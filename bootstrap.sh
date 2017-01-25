@@ -67,7 +67,8 @@ fi
 
 echo "starting dotCMS"
 /downloadedApps/dotcms-3.3.1/bin/shutdown.sh
-/downloadedApps/dotcms-3.3.1/bin/startup.sh
+#Handled in the Vagrantfile
+#/downloadedApps/dotcms-3.3.1/bin/startup.sh
 
 echo ''
 echo 'IN A FEW MINUTES, dotCMS will be accessible at http://localhost:8080/ (from your host)'
