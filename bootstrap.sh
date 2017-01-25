@@ -1,10 +1,12 @@
-#!/usr/bin/env bash
+#!/bin/bash
 updateRepos="true"
 downloadApps="true"
 unzipApps="true"
 installOracleJDK8="true"
+installMySQL="true"
 
-dotCMSDownloadURL="https://dotcms.com/physical_downloads/release_builds/dotcms_3.3.1.zip"
+version="3.3.1"
+dotCMSDownloadURL="https://dotcms.com/physical_downloads/release_builds/dotcms_$version.tar.gz"
 
 if  [ "$updateRepos" = "true" ]; then
 	echo 'Updating repos'
@@ -12,8 +14,7 @@ if  [ "$updateRepos" = "true" ]; then
 	echo 'Finished updating repos'
 fi
 
-#install Oracle JDK 8
-if [ "$installOracleJDK8" = "true" ]; then	
+if [ "$installOracleJDK8" = "true" ]; then
 	echo "Installing Java"
 	add-apt-repository ppa:webupd8team/java
 	apt-get update
@@ -25,36 +26,64 @@ if [ "$downloadApps" = "true" ]; then
 	echo "Downloading Apps..."
 	mkdir /downloadedApps
 	cd /downloadedApps
-	wget -cN --progress=bar:force ${dotCMSDownloadURL}
+  if [ ! -f dotcms_$version.tar.gz ]; then
+	  wget -cN --progress=bar:force ${dotCMSDownloadURL}
+  fi
 fi
 
 if [ "$unzipApps" = "true" ]; then
 	echo "Unzipping apps"
-	apt-get -y install unzip
 	cd /downloadedApps
-	unzip dotcms*.zip -d dotcms-3.3.1
+  if [ ! -d dotcms-$version ]; then
+	  mkdir dotcms-$version
+    cd dotcms-$version
+    tar xzf ../dotcms_$version.tar.gz
+  fi
 fi
 
+if [ "$installMySQL" = "true" ]; then
+	echo "Installing MySQL"
+	sudo debconf-set-selections <<< 'mysql-server mysql-server/root_password password root'
+	sudo debconf-set-selections <<< 'mysql-server mysql-server/root_password_again password root'
+	apt-get -y install mysql-server
+	apt-get -y install mysql-client
 
-echo "starting dotCMS"
-chmod a+x /downloadedApps/dotcms-3.3.1/bin/*.sh #not sure why these aren't executable already, but they aren't...
-chmod a+x /downloadedApps/dotcms-3.3.1/dotserver/tomcat*/bin/*.sh #not sure why these aren't executable already, but they aren't...
+	echo "Setting up MySQL"
+	if ! grep "lower_case_table_names=1" /etc/mysql/my.cnf ; then
+	sed -i '/\[mysqld\]/alower_case_table_names=1' /etc/mysql/my.cnf
+	service mysql restart
+	fi
 
+	echo "Configuring dotCMS to use MySQL"
+	echo 'create database dotcms default character set = utf8 default collate = utf8_general_ci;' | mysql --password=root
+	# necessary updates in context.xml
+	cd /downloadedApps/dotcms-3.3.1/dotserver/tomcat-8.0.18/webapps/ROOT/META-INF
+	cat context.xml | sed '29s/-->//' | sed '37s/^.*$/ -->/' | sed '47s/$/ -->/' | sed '54s/^.*$//' | sed '50s/dotcms2/dotcms/' | sed '51s/{your db user}/root/' | sed '51s/{your db password}/root/' > context.tmp
+	mv context.tmp context.xml
+fi
 #  Not necessary for most installations
-#sed -i  's/port="8080"/port="8081"/' /downloadedApps/dotcms-3.2.4/dotserver/tomcat-8.0.18/conf/server.xml #change the tomcat port 
+#sed -i  's/port="8080"/port="8081"/' /downloadedApps/dotcms-3.2.4/dotserver/tomcat-8.0.18/conf/server.xml #change the tomcat port
 #sed -i  's/Host name="localhost"/Host name="myHost"/' /downloadedApps/dotcms-3.2.4/dotserver/tomcat-8.0.18/conf/server.xml #update hostname for this tomcat instance
 
-sh /downloadedApps/dotcms-3.3.1/bin/startup.sh
+echo "starting dotCMS"
+/downloadedApps/dotcms-3.3.1/bin/shutdown.sh
+/downloadedApps/dotcms-3.3.1/bin/startup.sh
 
-	echo 'dotCMS should be accessible at http://localhost:8080/ (from your host)' 
-	echo '===== Application Credentials ====='
-	echo ''
-	echo '=== Admin ==='
-	echo 'username: admin@dotcms.com'
-	echo 'password: admin'
-	echo ''
-	echo '=== Limited User ==='
-	echo 'username: joe@dotcms.com'
-	echo 'password: joe'
-	echo '===== Application Credentials ====='
-	echo 'Script finished.'
+echo ''
+echo 'IN A FEW MINUTES, dotCMS will be accessible at http://localhost:8080/ (from your host)'
+echo '===== Application Credentials ====='
+echo ''
+echo '=== Admin ==='
+echo '     URL: http://localhost:8080/admin'
+echo 'username: admin@dotcms.com'
+echo 'password: admin'
+echo ''
+echo '=== Intranet User ==='
+echo 'username: bill@dotcms.com'
+echo 'password: bill'
+echo ''
+echo '=== Limited User ==='
+echo 'username: joe@dotcms.com'
+echo 'password: joe'
+echo '===== Application Credentials ====='
+echo 'Script finished.'

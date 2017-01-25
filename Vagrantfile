@@ -24,5 +24,6 @@ Vagrant.configure(2) do |config|
 #	apt-get update
 
 #SHELL
-config.vm.provision :shell, path: "bootstrap.sh", run: "always"
+	config.vm.provision :shell, path: "bootstrap.sh"
+	config.vm.provision :shell, inline: "/downloadedApps/dotcms-3.3.1/bin/startup.sh", run: "always"
 end
