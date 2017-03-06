@@ -13,7 +13,7 @@ Vagrant.configure(2) do |config|
 	# Bridged networks make the machine appear as another physical device on
 	# your network.
 	
-	config.vm.network "forwarded_port", guest: 8080, host: 8080 
+	config.vm.network "forwarded_port", guest: 9999, host: 9999 
    
    config.vm.provider "virtualbox" do |vb|
       vb.memory = "2048"
