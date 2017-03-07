@@ -57,25 +57,25 @@ if [ "$installMySQL" = "true" ]; then
 	echo "Configuring dotCMS to use MySQL"
 	echo 'create database dotcms default character set = utf8 default collate = utf8_general_ci;' | mysql --password=root
 	# necessary updates in context.xml
-	cd /downloadedApps/dotcms-3.3.1/dotserver/tomcat-8.0.18/webapps/ROOT/META-INF
+	cd /downloadedApps/dotcms-3.?.*/dotserver/tomcat-8.?.*/webapps/ROOT/META-INF
 	cat context.xml | sed '29s/-->//' | sed '37s/^.*$/ -->/' | sed '47s/$/ -->/' | sed '54s/^.*$//' | sed '50s/dotcms2/dotcms/' | sed '51s/{your db user}/root/' | sed '51s/{your db password}/root/' > context.tmp
 	mv context.tmp context.xml
 fi
 #  Not necessary for most installations
-#sed -i  's/port="8080"/port="8081"/' /downloadedApps/dotcms-3.2.4/dotserver/tomcat-8.0.18/conf/server.xml #change the tomcat port
-#sed -i  's/Host name="localhost"/Host name="myHost"/' /downloadedApps/dotcms-3.2.4/dotserver/tomcat-8.0.18/conf/server.xml #update hostname for this tomcat instance
+sed -i  's/port="8080"/port="9999"/' /downloadedApps/dotcms-3.?.*/dotserver/tomcat-8.?.*/conf/server.xml #change the tomcat port
+#sed -i  's/Host name="localhost"/Host name="myHost"/' /downloadedApps/dotcms-3.?.*/dotserver/tomcat-8.?.*/conf/server.xml #update hostname for this tomcat instance
 
 echo "starting dotCMS"
-/downloadedApps/dotcms-3.3.1/bin/shutdown.sh
+/downloadedApps/dotcms-3.?.*/bin/shutdown.sh
 #Handled in the Vagrantfile
-#/downloadedApps/dotcms-3.3.1/bin/startup.sh
+#/downloadedApps/dotcms-3.?.*/bin/startup.sh
 
 echo ''
-echo 'IN A FEW MINUTES, dotCMS will be accessible at http://localhost:8080/ (from your host)'
+echo 'IN A FEW MINUTES, dotCMS will be accessible at http://localhost:9999/ (from your host)'
 echo '===== Application Credentials ====='
 echo ''
 echo '=== Admin ==='
-echo '     URL: http://localhost:8080/admin'
+echo '     URL: http://localhost:9999/admin'
 echo 'username: admin@dotcms.com'
 echo 'password: admin'
 echo ''
