@@ -61,12 +61,12 @@ if [ "$installMySQL" = "true" ]; then
 	cat context.xml | sed '29s/-->//' | sed '37s/^.*$/ -->/' | sed '47s/$/ -->/' | sed '54s/^.*$//' | sed '50s/dotcms2/dotcms/' | sed '51s/{your db user}/root/' | sed '51s/{your db password}/root/' > context.tmp
 	mv context.tmp context.xml
 fi
+
 #  Not necessary for most installations
 sed -i  's/port="8080"/port="9999"/' /downloadedApps/dotcms-3.?.*/dotserver/tomcat-8.?.*/conf/server.xml #change the tomcat port
 #sed -i  's/Host name="localhost"/Host name="myHost"/' /downloadedApps/dotcms-3.?.*/dotserver/tomcat-8.?.*/conf/server.xml #update hostname for this tomcat instance
 
-echo "starting dotCMS"
-/downloadedApps/dotcms-3.?.*/bin/shutdown.sh
+#echo "starting dotCMS"
 #Handled in the Vagrantfile
 #/downloadedApps/dotcms-3.?.*/bin/startup.sh
 
